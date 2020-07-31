@@ -1,0 +1,444 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Import Statements"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 20,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import numpy as np\n",
+    "import pandas as pd\n",
+    "from sklearn.ensemble import RandomForestRegressor\n",
+    "from sklearn.neural_network import MLPRegressor\n",
+    "from sklearn.model_selection import train_test_split\n",
+    "from sklearn import preprocessing\n",
+    "from sklearn import metrics\n",
+    "from sklearn.svm import SVR\n",
+    "from sklearn.metrics import mean_squared_error,mean_absolute_error"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Loading the data and remove Null Values\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 21,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "total data size:  2000\n"
+     ]
+    },
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>latitude</th>\n",
+       "      <th>longitude</th>\n",
+       "      <th>depth</th>\n",
+       "      <th>mag</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <td>0</td>\n",
+       "      <td>-39.4322</td>\n",
+       "      <td>176.0322</td>\n",
+       "      <td>47.62</td>\n",
+       "      <td>4.4</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <td>1</td>\n",
+       "      <td>-6.0575</td>\n",
+       "      <td>147.7634</td>\n",
+       "      <td>170.62</td>\n",
+       "      <td>4.2</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <td>2</td>\n",
+       "      <td>-15.7539</td>\n",
+       "      <td>-173.8576</td>\n",
+       "      <td>59.82</td>\n",
+       "      <td>4.6</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <td>3</td>\n",
+       "      <td>-6.5595</td>\n",
+       "      <td>143.2629</td>\n",
+       "      <td>10.00</td>\n",
+       "      <td>4.5</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <td>4</td>\n",
+       "      <td>-14.1584</td>\n",
+       "      <td>166.5733</td>\n",
+       "      <td>25.81</td>\n",
+       "      <td>4.7</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "   latitude  longitude   depth  mag\n",
+       "0  -39.4322   176.0322   47.62  4.4\n",
+       "1   -6.0575   147.7634  170.62  4.2\n",
+       "2  -15.7539  -173.8576   59.82  4.6\n",
+       "3   -6.5595   143.2629   10.00  4.5\n",
+       "4  -14.1584   166.5733   25.81  4.7"
+      ]
+     },
+     "execution_count": 21,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "Dataset = pd.read_csv('radius/quakes_radius5000.csv')\n",
+    "Dataset = Dataset.dropna()\n",
+    "print('total data size: ', len(Dataset))\n",
+    "Dataset.head()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Extract X_train, Y_train, X_test and Y_test ##"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 22,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "((1600, 3), (1600,), (400, 3), (400,))"
+      ]
+     },
+     "execution_count": 22,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "X=Dataset.iloc[:,:-1].values\n",
+    "y=Dataset.iloc[:,-1].values\n",
+    "X_train, X_test, Y_train, Y_test = train_test_split(X,y, test_size= 0.20, random_state=42)\n",
+    "X_train.shape,Y_train.shape,X_test.shape,Y_test.shape"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Random Forest"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 23,
+   "metadata": {
+    "scrolled": true
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "0.4360152728116304\n"
+     ]
+    }
+   ],
+   "source": [
+    "random_forest = RandomForestRegressor(n_estimators=200,random_state=0)\n",
+    "random_forest.fit(X_train, Y_train)\n",
+    "y_pred = random_forest.predict(X_test)\n",
+    "rmse = np.sqrt(metrics.mean_squared_error(Y_test,y_pred))\n",
+    "print(rmse)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## RF prediction for Magnitude 4.4 \n",
+    "### Use only that one whose radius Dataset is loaded and comment others\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 24,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "[4.566]\n",
+      "[4.358]\n",
+      "[4.4415]\n",
+      "[4.4415]\n",
+      "[4.4415]\n",
+      "[4.4415]\n",
+      "[4.4415]\n"
+     ]
+    }
+   ],
+   "source": [
+    "y_pred100 = random_forest.predict([[-38.68,175.82,103]])\n",
+    "print(y_pred100)\n",
+    "\n",
+    "y_pred200 = random_forest.predict([[-38.2138,176.0145,197.25]])\n",
+    "print(y_pred200)\n",
+    "\n",
+    "y_pred500 = random_forest.predict([[-39.4322,176.0322,47.62]])\n",
+    "print(y_pred500)\n",
+    "\n",
+    "y_pred1000 = random_forest.predict([[-39.4322,176.0322,47.62]])\n",
+    "print(y_pred1000)\n",
+    "\n",
+    "y_pred1500 = random_forest.predict([[-39.4322,176.0322,47.62]])\n",
+    "print(y_pred1500)\n",
+    "\n",
+    "y_pred3000 = random_forest.predict([[-39.4322,176.0322,47.62]])\n",
+    "print(y_pred3000)\n",
+    "\n",
+    "y_pred5000 = random_forest.predict([[-39.4322,176.0322,47.62]])\n",
+    "print(y_pred5000)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Multi Layer Perceptron"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 29,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "0.4289790064267135\n"
+     ]
+    }
+   ],
+   "source": [
+    "mlp = MLPRegressor(hidden_layer_sizes=200,activation='tanh',random_state=0,solver='sgd')\n",
+    "mlp.fit(X_train, Y_train)\n",
+    "y_pred = mlp.predict(X_test)\n",
+    "rmse = np.sqrt(metrics.mean_squared_error(Y_test,y_pred))\n",
+    "print(rmse)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## MLP prediction for Magnitude 4.4 \n",
+    "### Use only that one whose radius Dataset is loaded and comment others"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 30,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "[4.81474581]\n",
+      "[4.71208207]\n",
+      "[4.76925336]\n",
+      "[4.76925336]\n",
+      "[4.76925336]\n",
+      "[4.76925336]\n",
+      "[4.76925336]\n"
+     ]
+    }
+   ],
+   "source": [
+    "y_pred100 = mlp.predict([[-38.68,175.82,103]])\n",
+    "print(y_pred100)\n",
+    "\n",
+    "y_pred200 = mlp.predict([[-38.2138,176.0145,197.25]])\n",
+    "print(y_pred200)\n",
+    "\n",
+    "y_pred500 = mlp.predict([[-39.4322,176.0322,47.62]])\n",
+    "print(y_pred500)\n",
+    "\n",
+    "y_pred1000 = mlp.predict([[-39.4322,176.0322,47.62]])\n",
+    "print(y_pred1000)\n",
+    "\n",
+    "y_pred1500 = mlp.predict([[-39.4322,176.0322,47.62]])\n",
+    "print(y_pred1500)\n",
+    "\n",
+    "y_pred3000 = mlp.predict([[-39.4322,176.0322,47.62]])\n",
+    "print(y_pred3000)\n",
+    "\n",
+    "y_pred5000 = mlp.predict([[-39.4322,176.0322,47.62]])\n",
+    "print(y_pred5000)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Support Vector Regression"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 31,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "0.4490749291722009\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "C:\\Users\\Akash\\Anaconda3\\lib\\site-packages\\sklearn\\svm\\base.py:193: FutureWarning: The default value of gamma will change from 'auto' to 'scale' in version 0.22 to account better for unscaled features. Set gamma explicitly to 'auto' or 'scale' to avoid this warning.\n",
+      "  \"avoid this warning.\", FutureWarning)\n"
+     ]
+    }
+   ],
+   "source": [
+    "svr=SVR(kernel='rbf')\n",
+    "svr.fit(X_train,Y_train)\n",
+    "y_pred = svr.predict(X_test)\n",
+    "rmse = np.sqrt(metrics.mean_squared_error(Y_test,y_pred))\n",
+    "print(rmse)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## SVR prediction for Magnitude 4.4 \n",
+    "### Use only that one whose radius Dataset is loaded and comment others"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 32,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "[4.5263847]\n",
+      "[4.5263847]\n",
+      "[4.49966456]\n",
+      "[4.49966456]\n",
+      "[4.49966456]\n",
+      "[4.49966456]\n",
+      "[4.49966456]\n"
+     ]
+    }
+   ],
+   "source": [
+    "y_pred100 = svr.predict([[-38.68,175.82,103]])\n",
+    "print(y_pred100)\n",
+    "\n",
+    "y_pred200 = svr.predict([[-38.2138,176.0145,197.25]])\n",
+    "print(y_pred200)\n",
+    "\n",
+    "y_pred500 = svr.predict([[-39.4322,176.0322,47.62]])\n",
+    "print(y_pred500)\n",
+    "\n",
+    "y_pred1000 = svr.predict([[-39.4322,176.0322,47.62]])\n",
+    "print(y_pred1000)\n",
+    "\n",
+    "y_pred1500 = svr.predict([[-39.4322,176.0322,47.62]])\n",
+    "print(y_pred1500)\n",
+    "\n",
+    "y_pred3000 = svr.predict([[-39.4322,176.0322,47.62]])\n",
+    "print(y_pred3000)\n",
+    "\n",
+    "y_pred5000 = svr.predict([[-39.4322,176.0322,47.62]])\n",
+    "print(y_pred5000)\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.7.4"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 2
+}
